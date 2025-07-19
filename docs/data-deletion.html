@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xóa Dữ liệu Người dùng - CowReading</title>
+    <meta name="description" content="Hướng dẫn xóa dữ liệu tài khoản và thông tin cá nhân trên CowReading">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        
+        .step-card {
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s ease;
+        }
+        
+        .step-card:hover {
+            border-left-color: #1d4ed8;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .email-template {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="https://huongne1505.github.io/cowreading/" class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <i data-lucide="book-open" class="text-blue-600"></i>
+                <span>CowReading</span>
+            </a>
+            <a href="https://huongne1505.github.io/cowreading/" class="text-blue-600 hover:text-blue-800 font-medium">
+                ← Về trang chủ
+            </a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12 max-w-4xl">
+        
+        <!-- Title Section -->
+        <div class="text-center mb-12">
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                    <i data-lucide="trash-2" class="w-8 h-8 text-red-600"></i>
+                </div>
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">Xóa Dữ liệu Người dùng</h1>
+                <p class="text-gray-600 text-lg">
+                    Hướng dẫn chi tiết để xóa tài khoản và dữ liệu cá nhân khỏi CowReading
+                </p>
+                <p class="text-sm text-gray-500 mt-2">Cập nhật lần cuối: 19/7/2025</p>
+            </div>
+        </div>
+
+        <!-- Warning Notice -->
+        <div class="warning-box p-6 rounded-lg mb-8">
+            <div class="flex items-start">
+                <i data-lucide="alert-triangle" class="w-6 h-6 text-yellow-600 mr-3 mt-0.5 flex-shrink-0"></i>
+                <div>
+                    <h3 class="font-bold text-yellow-800 mb-2">⚠️ Lưu ý quan trọng</h3>
+                    <p class="text-yellow-700">
+                        Việc xóa dữ liệu là <strong>KHÔNG THỂ HOÀN TÁC</strong>. Tất cả thông tin tài khoản, 
+                        lịch sử đọc sách, đánh giá và dữ liệu cá nhân sẽ bị xóa vĩnh viễn khỏi hệ thống.
+                        Vui lòng cân nhắc kỹ trước khi thực hiện.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Steps -->
+        <div class="space-y-8">
+            
+            <!-- Step 1 -->
+            <div class="step-card bg-white rounded-lg shadow-md p-8">
+                <div class="flex items-start">
+                    <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mr-4 flex-shrink-0">
+                        <span class="font-bold text-blue-600">1</span>
+                    </div>
+                    <div class="flex-grow">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            <i data-lucide="mail" class="inline w-6 h-6 mr-2"></i>
+                            Gửi yêu cầu xóa dữ liệu
+                        </h2>
+                        <p class="text-gray-700 mb-4">
+                            Gửi email yêu cầu xóa dữ liệu đến địa chỉ chính thức của chúng tôi:
+                        </p>
+                        
+                        <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                            <p class="font-bold text-blue-800">📧 Địa chỉ email:</p>
+                            <a href="mailto:privacy@cowreading.com" class="text-blue-600 hover:underline font-mono">
+                                privacy@cowreading.com
+                            </a>
+                        </div>
+
+                        <div class="email-template p-4 mb-4">
+                            <p class="font-bold mb-2">📋 Mẫu email (sao chép và sử dụng):</p>
+                            <div class="bg-white p-4 rounded border text-sm">
+                                <p><strong>Tiêu đề:</strong> Yêu cầu xóa dữ liệu tài khoản CowReading</p>
+                                <br>
+                                <p>Kính chào đội ngũ CowReading,</p>
+                                <br>
+                                <p>Tôi muốn yêu cầu xóa hoàn toàn tài khoản và tất cả dữ liệu cá nhân của tôi khỏi nền tảng CowReading.</p>
+                                <br>
+                                <p><strong>Thông tin tài khoản cần xóa:</strong></p>
+                                <p>- Email đăng ký: [email của bạn]</p>
+                                <p>- Tên người dùng: [username của bạn]</p>
+                                <p>- Ngày đăng ký (nếu nhớ): [dd/mm/yyyy]</p>
+                                <br>
+                                <p>Tôi hiểu rằng việc xóa dữ liệu là không thể hoàn tác và tất cả thông tin sẽ bị mất vĩnh viễn.</p>
+                                <br>
+                                <p>Trân trọng,</p>
+                                <p>[Tên của bạn]</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-600">
+                                <i data-lucide="info" class="inline w-4 h-4 mr-1"></i>
+                                <strong>Lưu ý:</strong> Hãy gửi email từ chính địa chỉ email bạn đã đăng ký tài khoản để chúng tôi có thể xác thực danh tính.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-card bg-white rounded-lg shadow-md p-8">
+                <div class="flex items-start">
+                    <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mr-4 flex-shrink-0">
+                        <span class="font-bold text-blue-600">2</span>
+                    </div>
+                    <div class="flex-grow">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            <i data-lucide="shield-check" class="inline w-6 h-6 mr-2"></i>
+                            Xác thực danh tính
+                        </h2>
+                        <p class="text-gray-700 mb-4">
+                            Để bảo mật và tránh xóa nhầm dữ liệu, chúng tôi sẽ thực hiện các bước xác thực:
+                        </p>
+                        
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span>Kiểm tra địa chỉ email gửi yêu cầu có trùng với email đăng ký</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span>Xác thực thông tin tài khoản (username, ngày đăng ký)</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span>Gửi email xác nhận cuối cùng để đảm bảo ý định xóa dữ liệu</span>
+                            </li>
+                        </ul>
+
+                        <div class="bg-amber-50 p-4 rounded-lg mt-4">
+                            <p class="text-amber-700">
+                                <i data-lucide="clock" class="inline w-4 h-4 mr-1"></i>
+                                <strong>Thời gian xử lý:</strong> Quá trình xác thực thường mất 1-2 ngày làm việc.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-card bg-white rounded-lg shadow-md p-8">
+                <div class="flex items-start">
+                    <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mr-4 flex-shrink-0">
+                        <span class="font-bold text-blue-600">3</span>
+                    </div>
+                    <div class="flex-grow">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            <i data-lucide="database" class="inline w-6 h-6 mr-2"></i>
+                            Xóa dữ liệu hoàn toàn
+                        </h2>
+                        <p class="text-gray-700 mb-4">
+                            Sau khi xác thực thành công, chúng tôi sẽ tiến hành xóa tất cả dữ liệu của bạn:
+                        </p>
+                        
+                        <div class="grid md:grid-cols-2 gap-4 mb-6">
+                            <div class="bg-red-50 p-4 rounded-lg">
+                                <h4 class="font-bold text-red-800 mb-2">🗑️ Dữ liệu sẽ bị xóa:</h4>
+                                <ul class="text-sm text-red-700 space-y-1">
+                                    <li>• Thông tin tài khoản (email, username, mật khẩu)</li>
+                                    <li>• Hồ sơ cá nhân (ảnh đại diện, tiểu sử)</li>
+                                    <li>• Lịch sử đọc sách và tiến độ</li>
+                                    <li>• Đánh giá và bình luận</li>
+                                    <li>• Danh sách yêu thích</li>
+                                    <li>• Lịch sử tìm kiếm</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <h4 class="font-bold text-green-800 mb-2">✅ Cam kết của chúng tôi:</h4>
+                                <ul class="text-sm text-green-700 space-y-1">
+                                    <li>• Xóa dữ liệu trong vòng 30 ngày</li>
+                                    <li>• Không lưu trữ backup dữ liệu cá nhân</li>
+                                    <li>• Xóa khỏi tất cả hệ thống và server</li>
+                                    <li>• Gửi email xác nhận hoàn tất</li>
+                                    <li>• Tuân thủ GDPR và luật bảo mật</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="text-blue-700">
+                                <i data-lucide="mail-check" class="inline w-4 h-4 mr-1"></i>
+                                Bạn sẽ nhận được email xác nhận khi quá trình xóa dữ liệu hoàn tất thành công.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Alternative Options -->
+        <div class="bg-white rounded-lg shadow-md p-8 mt-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                <i data-lucide="help-circle" class="inline w-6 h-6 mr-2"></i>
+                Các lựa chọn thay thế
+            </h2>
+            <p class="text-gray-700 mb-4">
+                Nếu bạn chưa chắc chắn về việc xóa tài khoản, hãy xem xét các tùy chọn sau:
+            </p>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="border border-gray-200 p-4 rounded-lg">
+                    <h4 class="font-bold text-gray-800 mb-2">🔒 Vô hiệu hóa tài khoản tạm thời</h4>
+                    <p class="text-sm text-gray-600">
+                        Tài khoản sẽ bị ẩn nhưng dữ liệu vẫn được bảo toàn. 
+                        Bạn có thể khôi phục bất cứ lúc nào.
+                    </p>
+                </div>
+                
+                <div class="border border-gray-200 p-4 rounded-lg">
+                    <h4 class="font-bold text-gray-800 mb-2">🔄 Đặt lại cài đặt riêng tư</h4>
+                    <p class="text-sm text-gray-600">
+                        Thay đổi cài đặt để hạn chế thu thập và sử dụng dữ liệu 
+                        mà không cần xóa tài khoản.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="bg-white rounded-lg shadow-md p-8 mt-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                <i data-lucide="message-circle" class="inline w-6 h-6 mr-2"></i>
+                Cần hỗ trợ?
+            </h2>
+            <p class="text-gray-700 mb-4">
+                Nếu bạn gặp khó khăn hoặc có câu hỏi về quy trình xóa dữ liệu, 
+                đừng ngần ngại liên hệ với chúng tôi:
+            </p>
+            
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <i data-lucide="mail" class="w-8 h-8 text-blue-600 mx-auto mb-2"></i>
+                    <p class="font-medium">Email hỗ trợ</p>
+                    <a href="mailto:privacy@cowreading.com" class="text-blue-600 hover:underline text-sm">
+                        privacy@cowreading.com
+                    </a>
+                </div>
+                
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <i data-lucide="shield" class="w-8 h-8 text-blue-600 mx-auto mb-2"></i>
+                    <p class="font-medium">Chính sách quyền riêng tư</p>
+                    <a href="privacy-policy.html" class="text-blue-600 hover:underline text-sm">
+                        Xem chi tiết
+                    </a>
+                </div>
+                
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <i data-lucide="home" class="w-8 h-8 text-blue-600 mx-auto mb-2"></i>
+                    <p class="font-medium">Trang chủ</p>
+                    <a href="https://huongne1505.github.io/cowreading/" class="text-blue-600 hover:underline text-sm">
+                        CowReading.com
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12 pt-8 border-t border-gray-200">
+            <p class="text-sm text-gray-600">
+                © 2025 CowReading. Tất cả quyền được bảo lưu.
+            </p>
+            <div class="mt-4">
+                <a href="https://huongne1505.github.io/cowreading/" class="text-blue-600 hover:text-blue-800 mx-3">Trang chủ</a>
+                <a href="privacy-policy.html" class="text-blue-600 hover:text-blue-800 mx-3">Chính sách quyền riêng tư</a>
+                <a href="mailto:privacy@cowreading.com" class="text-blue-600 hover:text-blue-800 mx-3">Liên hệ</a>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+    </script>
+
+</body>
+</html>
