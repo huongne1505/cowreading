@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thể Loại Sách - Sách Hay Mỗi Ngày</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+        #ai-introduction-container { transition: opacity 0.5s ease, max-height 0.5s ease; max-height: 0; opacity: 0; overflow: hidden; }
+        #ai-introduction-container.show { max-height: 1000px; opacity: 1; }
+        .book-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .book-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .book-cover { aspect-ratio: 3/4; }
+        .loading-skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .dark .loading-skeleton { background: linear-gradient(90deg, #374151 25%, #4B5563 50%, #374151 75%); background-size: 200% 100%; }
+    </style>
+    <script>
+        // Script để áp dụng Dark Mode ngay lập tức
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+
+    <!-- Header -->
+    <header id="main-header" class="sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm dark:border-b dark:border-gray-800">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <i data-lucide="book-open" class="text-blue-600"></i><span>Sách Hay</span>
+            </a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="index.html" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white">Khám Phá</a>
+                <a href="categories.html" class="text-blue-600 dark:text-blue-400 font-semibold">Thể Loại</a>
+                <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white">Tác Giả</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="theme-toggle" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <i id="theme-toggle-dark-icon" class="hidden" data-lucide="moon"></i>
+                    <i id="theme-toggle-light-icon" class="hidden" data-lucide="sun"></i>
+                </button>
+                <div id="user-actions"></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+        <!-- Breadcrumbs và Tiêu đề -->
+        <div class="mb-8">
+            <nav class="text-sm mb-4" aria-label="Breadcrumb">
+                <ol class="list-none p-0 inline-flex text-gray-500 dark:text-gray-400">
+                    <li class="flex items-center"><a href="index.html" class="hover:text-blue-600 dark:hover:text-white">Trang chủ</a><i data-lucide="chevron-right" class="w-4 h-4 mx-2"></i></li>
+                    <li class="flex items-center"><a href="categories.html" class="hover:text-blue-600 dark:hover:text-white">Thể loại</a><i data-lucide="chevron-right" class="w-4 h-4 mx-2"></i></li>
+                    <li id="category-breadcrumb" class="text-gray-800 dark:text-gray-200 font-semibold">Đang tải...</li>
+                </ol>
+            </nav>
+            <h1 id="category-title" class="text-4xl font-bold text-gray-900 dark:text-white">Đang tải...</h1>
+            <p id="category-description" class="mt-2 text-gray-600 dark:text-gray-400 max-w-2xl">Đang tải mô tả thể loại...</p>
+            <button id="ai-intro-btn" class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">
+                <i data-lucide="sparkles" class="w-5 h-5 text-yellow-500"></i><span>AI viết lời giới thiệu</span>
+            </button>
+        </div>
+
+        <!-- Vùng hiển thị AI -->
+        <div id="ai-introduction-container" class="mb-12">
+            <div id="ai-introduction-content" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md prose dark:prose-invert max-w-none">
+                <div class="flex items-center gap-2 mb-4">
+                    <i data-lucide="loader" class="w-5 h-5 animate-spin text-blue-600"></i>
+                    <span class="text-gray-600 dark:text-gray-400">AI đang tạo nội dung...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lọc và Sắp xếp -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <p id="results-info" class="text-gray-600 dark:text-gray-400">Đang tải...</p>
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <select id="sort-select" class="appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md py-2 pl-3 pr-10 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="latest">Sắp xếp theo: Mới nhất</option>
+                        <option value="popular">Sắp xếp theo: Phổ biến nhất</option>
+                        <option value="rating">Sắp xếp theo: Đánh giá cao</option>
+                        <option value="title">Sắp xếp theo: Tên A-Z</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-400">
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="grid-view" class="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 bg-gray-100 dark:bg-gray-800">
+                        <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+                    </button>
+                    <button id="list-view" class="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <i data-lucide="list" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lưới sách -->
+        <div id="books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-6 gap-y-10">
+            <!-- Loading skeleton -->
+            <div class="loading-skeleton rounded-lg h-80"></div>
+            <div class="loading-skeleton rounded-lg h-80"></div>
+            <div class="loading-skeleton rounded-lg h-80"></div>
+            <div class="loading-skeleton rounded-lg h-80"></div>
+            <div class="loading-skeleton rounded-lg h-80"></div>
+            <div class="loading-skeleton rounded-lg h-80"></div>
+        </div>
+
+        <!-- Danh sách sách (cho list view) -->
+        <div id="books-list" class="hidden space-y-4">
+            <!-- List items will be populated here -->
+        </div>
+
+        <!-- Phân trang -->
+        <nav id="pagination" class="mt-12 flex items-center justify-center" aria-label="Pagination">
+            <!-- Pagination content will be populated here -->
+        </nav>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 dark:bg-black/50 text-white mt-16">
+        <div class="container mx-auto px-6 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i data-lucide="book-open" class="text-blue-400 w-8 h-8"></i>
+                        <span class="text-xl font-bold">Sách Hay</span>
+                    </div>
+                    <p class="text-gray-400">Nền tảng đọc sách trực tuyến hàng đầu Việt Nam</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Khám phá</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Sách mới</a></li>
+                        <li><a href="#" class="hover:text-white">Sách hay</a></li>
+                        <li><a href="#" class="hover:text-white">Tác giả</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Thể loại</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Tiểu thuyết</a></li>
+                        <li><a href="#" class="hover:text-white">Kinh tế</a></li>
+                        <li><a href="#" class="hover:text-white">Khoa học</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Hỗ trợ</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Liên hệ</a></li>
+                        <li><a href="#" class="hover:text-white">Hướng dẫn</a></li>
+                        <li><a href="#" class="hover:text-white">Điều khoản</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 Sách Hay. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Book Detail Modal -->
+    <div id="book-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h2 id="modal-title" class="text-2xl font-bold text-gray-900 dark:text-white"></h2>
+                    <button id="close-modal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="flex-shrink-0">
+                        <img id="modal-cover" class="w-48 h-64 object-cover rounded-lg shadow-lg" alt="Book cover">
+                    </div>
+                    <div class="flex-1">
+                        <div class="mb-4">
+                            <p class="text-gray-600 dark:text-gray-400 mb-2">Tác giả: <span id="modal-author" class="font-medium"></span></p>
+                            <p class="text-gray-600 dark:text-gray-400 mb-2">Thể loại: <span id="modal-category" class="font-medium"></span></p>
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="flex items-center" id="modal-rating">
+                                    <!-- Stars will be populated here -->
+                                </div>
+                                <span id="modal-rating-text" class="text-sm text-gray-500"></span>
+                            </div>
+                        </div>
+                        <p id="modal-description" class="text-gray-700 dark:text-gray-300 mb-6"></p>
+                        <div class="flex gap-3">
+                            <button id="modal-read-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors">
+                                Đọc ngay
+                            </button>
+                            <button id="modal-favorite-btn" class="p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <i data-lucide="heart" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:3000/api';
+        let currentPage = 1;
+        let currentCategoryId = null;
+        let currentSort = 'latest';
+        let currentView = 'grid';
+        let allBooks = [];
+        let currentUser = null;
+
+        // DOM Elements
+        const elementsCache = {
+            categoryTitle: document.getElementById('category-title'),
+            categoryDescription: document.getElementById('category-description'),
+            categoryBreadcrumb: document.getElementById('category-breadcrumb'),
+            booksGrid: document.getElementById('books-grid'),
+            booksList: document.getElementById('books-list'),
+            resultsInfo: document.getElementById('results-info'),
+            sortSelect: document.getElementById('sort-select'),
+            gridViewBtn: document.getElementById('grid-view'),
+            listViewBtn: document.getElementById('list-view'),
+            pagination: document.getElementById('pagination'),
+            aiIntroBtn: document.getElementById('ai-intro-btn'),
+            aiIntroContainer: document.getElementById('ai-introduction-container'),
+            aiIntroContent: document.getElementById('ai-introduction-content'),
+            userActions: document.getElementById('user-actions'),
+            bookModal: document.getElementById('book-modal'),
+            themeToggleBtn: document.getElementById('theme-toggle'),
+            darkIcon: document.getElementById('theme-toggle-dark-icon'),
+            lightIcon: document.getElementById('theme-toggle-light-icon')
+        };
+
+        // Theme Management
+        function initTheme() {
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                elementsCache.lightIcon.classList.remove('hidden');
+            } else {
+                elementsCache.darkIcon.classList.remove('hidden');
+            }
+
+            elementsCache.themeToggleBtn.addEventListener('click', () => {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                    elementsCache.darkIcon.classList.remove('hidden');
+                    elementsCache.lightIcon.classList.add('hidden');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                    elementsCache.lightIcon.classList.remove('hidden');
+                    elementsCache.darkIcon.classList.add('hidden');
+                }
+            });
+        }
+
+        // Auth Management
+        function checkAuth() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('currentUser');
+            
+            if (token && user) {
+                currentUser = JSON.parse(user);
+                return true;
+            }
+            return false;
+        }
+
+        function updateAuthUI() {
+            const isLoggedIn = checkAuth();
+            
+            if (isLoggedIn) {
+                elementsCache.userActions.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <div class="relative group">
+                            <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                                    ${currentUser.name.charAt(0).toUpperCase()}
+                                </div>
+                                <span class="hidden md:block text-gray-700 dark:text-gray-300">${currentUser.name}</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-700 py-1 hidden group-hover:block">
+                                <a href="#" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Thư viện của tôi</a>
+                                <a href="#" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Cài đặt</a>
+                                <button onclick="logout()" class="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Đăng xuất</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                elementsCache.userActions.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <button onclick="showLoginModal()" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white">Đăng nhập</button>
+                        <button onclick="showRegisterModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">Đăng ký</button>
+                    </div>
+                `;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            updateAuthUI();
+        }
+
+        function showLoginModal() {
+            window.location.href = 'auth.html';
+        }
+
+        function showRegisterModal() {
+            window.location.href = 'auth.html?mode=register';
+        }
+
+        // API Functions
+        async function apiRequest(endpoint, options = {}) {
+            const token = localStorage.getItem('authToken');
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                }
+            };
+
+            const config = { ...defaultOptions, ...options };
+            if (config.body && typeof config.body === 'object') {
+                config.body = JSON.stringify(config.body);
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API request failed:', error);
+                throw error;
+            }
+        }
+
+        // Get category from URL
+        function getCategoryFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('category') || '1'; // Default to category 1
+        }
+
+        // Load category data
+        async function loadCategory() {
+            try {
+                currentCategoryId = getCategoryFromURL();
+                const response = await apiRequest(`/categories/${currentCategoryId}`);
+                
+                if (response.success) {
+                    const category = response.data;
+                    elementsCache.categoryTitle.textContent = `Sách ${category.name}`;
+                    elementsCache.categoryBreadcrumb.textContent = category.name;
+                    elementsCache.categoryDescription.textContent = category.description || `Khám phá các đầu sách thuộc thể loại ${category.name}.`;
+                    
+                    // Update page title
+                    document.title = `${category.name} - Sách Hay Mỗi Ngày`;
+                }
+            } catch (error) {
+                console.error('Error loading category:', error);
+                elementsCache.categoryTitle.textContent = 'Không thể tải thể loại';
+                elementsCache.categoryDescription.textContent = 'Đã xảy ra lỗi khi tải thông tin thể loại.';
+            }
+        }
+
+        // Load books for category
+        async function loadBooks() {
+            try {
+                showLoadingSkeleton();
+                const response = await apiRequest(`/books?category=${currentCategoryId}&sort=${currentSort}&page=${currentPage}`);
+                
+                if (response.success) {
+                    allBooks = response.data.data || [];
+                    displayBooks();
+                    updateResultsInfo(response.data);
+                    updatePagination(response.data);
+                } else {
+                    throw new Error('Failed to load books');
+                }
+            } catch (error) {
+                console.error('Error loading books:', error);
+                displayError();
+            }
+        }
+
+        function showLoadingSkeleton() {
+            elementsCache.booksGrid.innerHTML = Array(12).fill(0).map(() => 
+                '<div class="loading-skeleton rounded-lg h-80"></div>'
+            ).join('');
+        }
+
+        function displayBooks() {
+            if (currentView === 'grid') {
+                displayBooksGrid();
+            } else {
+                displayBooksList();
+            }
+        }
+
+        function displayBooksGrid() {
+            elementsCache.booksGrid.classList.remove('hidden');
+            elementsCache.booksList.classList.add('hidden');
+            
+            if (allBooks.length === 0) {
+                elementsCache.booksGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i data-lucide="book-open" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                        <p class="text-gray-600 dark:text-gray-400">Không có sách nào trong thể loại này.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            elementsCache.booksGrid.innerHTML = allBooks.map(book => `
+                <div class="book-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden cursor-pointer" onclick="showBookModal(${book.id})">
+                    <div class="book-cover">
+                        <img src="${book.cover_image || '/api/placeholder/300/400'}" alt="${book.title}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">${book.title}</h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">${book.author?.name || 'Tác giả không rõ'}</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                ${generateStarRating(book.rating || 0)}
+                                <span class="text-sm text-gray-500 ml-1">(${book.reviews_count || 0})</span>
+                            </div>
+                            <button onclick="event.stopPropagation(); toggleFavorite(${book.id})" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                <i data-lucide="heart" class="w-4 h-4 text-gray-400"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayBooksList() {
+            elementsCache.booksGrid.classList.add('hidden');
+            elementsCache.booksList.classList.remove('hidden');
+            
+            if (allBooks.length === 0) {
+                elementsCache.booksList.innerHTML = `
+                    <div class="text-center py-12">
+                        <i data-lucide="book-open" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                        <p class="text-gray-600 dark:text-gray-400">Không có sách nào trong thể loại này.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            elementsCache.booksList.innerHTML = allBooks.map(book => `
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex gap-4 cursor-pointer hover:shadow-lg transition-shadow" onclick="showBookModal(${book.id})">
+                    <div class="flex-shrink-0">
+                        <img src="${book.cover_image || '/api/placeholder/300/400'}" alt="${book.title}" class="w-20 h-28 object-cover rounded-lg">
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-1">${book.title}</h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">${book.author?.name || 'Tác giả không rõ'}</p>
+                        <p class="text-gray-700 dark:text-gray-300 text-sm mb-3 line-clamp-2">${book.description || 'Không có mô tả'}</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                ${generateStarRating(book.rating || 0)}
+                                <span class="text-sm text-gray-500 ml-1">(${book.reviews_count || 0})</span>
+                            </div>
+                            <button onclick="event.stopPropagation(); toggleFavorite(${book.id})" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                <i data-lucide="heart" class="w-4 h-4 text-gray-400"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayError() {
+            const errorHTML = `
+                <div class="col-span-full text-center py-12">
+                    <i data-lucide="alert-circle" class="w-16 h-16 text-red-400 mx-auto mb-4"></i>
+                    <p class="text-gray-600 dark:text-gray-400">Đã xảy ra lỗi khi tải sách. Vui lòng thử lại.</p>
+                    <button onclick="loadBooks()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        Thử lại
+                    </button>
+                </div>
+            `;
+            elementsCache.booksGrid.innerHTML = errorHTML;
+        }
+
+        function generateStarRating(rating) {
+            const stars = [];
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    stars.push('<i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current"></i>');
+                } else {
+                    stars.push('<i data-lucide="star" class="w-4 h-4 text-gray-300"></i>');
+                }
+            }
+            return stars.join('');
+        }
+
+        function updateResultsInfo(data) {
+            const start = ((data.current_page - 1) * data.per_page) + 1;
+            const end = Math.min(data.current_page * data.per_page, data.total);
+            elementsCache.resultsInfo.textContent = `Hiển thị ${start}-${end} trên ${data.total} kết quả`;
+        }
+
+        function updatePagination(data) {
+            if (data.last_page <= 1) {
+                elementsCache.pagination.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+            
+            // Previous button
+            if (data.current_page > 1) {
+                paginationHTML += `
+                    <button onclick="changePage(${data.current_page - 1})" class="px-3 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                    </button>
+                `;
+            }
+
+            // Page numbers
+            const startPage = Math.max(1, data.current_page - 2);
+            const endPage = Math.min(data.last_page, data.current_page + 2);
+
+            for (let i = startPage; i <= endPage; i++) {
+                const isActive = i === data.current_page;
+                paginationHTML += `
+                    <button onclick="changePage(${i})" class="px-3 py-2 ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'} rounded-md">
+                        ${i}
+                    </button>
+                `;
+            }
+
+            // Next button
+            if (data.current_page < data.last_page) {
+                paginationHTML += `
+                    <button onclick="changePage(${data.current_page + 1})" class="px-3 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                    </button>
+                `;
+            }
+
+            elementsCache.pagination.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadBooks();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // View toggle functions
+        function toggleView(view) {
+            currentView = view;
+            
+            if (view === 'grid') {
+                elementsCache.gridViewBtn.classList.add('bg-gray-100', 'dark:bg-gray-800');
+                elementsCache.listViewBtn.classList.remove('bg-gray-100', 'dark:bg-gray-800');
+            } else {
+                elementsCache.listViewBtn.classList.add('bg-gray-100', 'dark:bg-gray-800');
+                elementsCache.gridViewBtn.classList.remove('bg-gray-100', 'dark:bg-gray-800');
+            }
+            
+            displayBooks();
+        }
+
+        // Sort function
+        function changeSort(sort) {
+            currentSort = sort;
+            currentPage = 1;
+            loadBooks();
+        }
+
+        // Favorite function
+        async function toggleFavorite(bookId) {
+            if (!currentUser) {
+                showLoginModal();
+                return;
+            }
+
+            try {
+                await apiRequest(`/favorites/${bookId}`, { method: 'POST' });
+                // Update UI to show favorite status
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+            }
+        }
+
+        // Book modal functions
+        async function showBookModal(bookId) {
+            try {
+                const response = await apiRequest(`/books/${bookId}`);
+                if (response.success) {
+                    const book = response.data;
+                    
+                    document.getElementById('modal-title').textContent = book.title;
+                    document.getElementById('modal-cover').src = book.cover_image || '/api/placeholder/300/400';
+                    document.getElementById('modal-author').textContent = book.author?.name || 'Tác giả không rõ';
+                    document.getElementById('modal-category').textContent = book.category?.name || 'Thể loại không rõ';
+                    document.getElementById('modal-description').textContent = book.description || 'Không có mô tả';
+                    document.getElementById('modal-rating').innerHTML = generateStarRating(book.rating || 0);
+                    document.getElementById('modal-rating-text').textContent = `(${book.reviews_count || 0} đánh giá)`;
+                    
+                    // Set up buttons
+                    document.getElementById('modal-read-btn').onclick = () => {
+                        window.location.href = `reader.html?book=${bookId}`;
+                    };
+                    
+                    elementsCache.bookModal.classList.remove('hidden');
+                    elementsCache.bookModal.classList.add('flex');
+                }
+            } catch (error) {
+                console.error('Error loading book details:', error);
+            }
+        }
+
+        function closeModal() {
+            elementsCache.bookModal.classList.add('hidden');
+            elementsCache.bookModal.classList.remove('flex');
+        }
+
+        // AI Introduction
+        async function generateAIIntroduction() {
+            try {
+                elementsCache.aiIntroContainer.classList.add('show');
+                
+                // Simulate AI content generation
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                const category = elementsCache.categoryBreadcrumb.textContent;
+                const introContent = `
+                    <h3 class="text-xl font-semibold mb-4">Giới thiệu về sách ${category}</h3>
+                    <p class="mb-4">
+                        Thể loại ${category} là một trong những lĩnh vực quan trọng và thu hút nhiều độc giả. 
+                        Các tác phẩm trong thể loại này mang đến những kiến thức, trải nghiệm và cảm xúc đa dạng.
+                    </p>
+                    <p class="mb-4">
+                        Qua việc đọc sách ${category}, bạn sẽ được khám phá những góc nhìn mới, 
+                        mở rộng tầm hiểu biết và phát triển tư duy phản biện. Đây là cơ hội tuyệt vời 
+                        để bạn học hỏi từ những chuyên gia hàng đầu trong lĩnh vực.
+                    </p>
+                    <p>
+                        Hãy bắt đầu hành trình khám phá tri thức cùng với bộ sưu tập sách ${category} 
+                        phong phú và chất lượng cao của chúng tôi!
+                    </p>
+                `;
+                
+                elementsCache.aiIntroContent.innerHTML = introContent;
+            } catch (error) {
+                console.error('Error generating AI introduction:', error);
+                elementsCache.aiIntroContent.innerHTML = `
+                    <p class="text-red-600 dark:text-red-400">
+                        Đã xảy ra lỗi khi tạo nội dung giới thiệu. Vui lòng thử lại sau.
+                    </p>
+                `;
+            }
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            // Sort change
+            elementsCache.sortSelect.addEventListener('change', (e) => {
+                changeSort(e.target.value);
+            });
+
+            // View toggle
+            elementsCache.gridViewBtn.addEventListener('click', () => toggleView('grid'));
+            elementsCache.listViewBtn.addEventListener('click', () => toggleView('list'));
+
+            // AI introduction
+            elementsCache.aiIntroBtn.addEventListener('click', generateAIIntroduction);
+
+            // Modal close
+            document.getElementById('close-modal').addEventListener('click', closeModal);
+            elementsCache.bookModal.addEventListener('click', (e) => {
+                if (e.target === elementsCache.bookModal) {
+                    closeModal();
+                }
+            });
+
+            // ESC key to close modal
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !elementsCache.bookModal.classList.contains('hidden')) {
+                    closeModal();
+                }
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            initTheme();
+            updateAuthUI();
+            setupEventListeners();
+            
+            await loadCategory();
+            await loadBooks();
+            
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

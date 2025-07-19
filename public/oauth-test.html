@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Test - Sách Hay Mỗi Ngày</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 py-8">
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold text-center mb-6">OAuth Test</h1>
+        
+        <div class="space-y-4">
+            <a href="/api/auth/facebook" class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-md">
+                Test Facebook OAuth
+            </a>
+            
+            <a href="/api/auth/google" class="block w-full bg-red-600 hover:bg-red-700 text-white text-center py-2 px-4 rounded-md">
+                Test Google OAuth
+            </a>
+            
+            <div class="mt-6 p-4 bg-gray-50 rounded-md">
+                <h3 class="font-semibold mb-2">Cấu hình cần thiết:</h3>
+                <ol class="text-sm text-gray-600 space-y-1 list-decimal list-inside">
+                    <li>Tạo Facebook App tại: <a href="https://developers.facebook.com" class="text-blue-600 underline">Facebook Developers</a></li>
+                    <li>Tạo Google OAuth Client tại: <a href="https://console.cloud.google.com" class="text-blue-600 underline">Google Cloud Console</a></li>
+                    <li>Cập nhật file .env với Client ID và Secret</li>
+                    <li>Redirect URIs phải match với cấu hình OAuth</li>
+                </ol>
+            </div>
+            
+            <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                <h3 class="font-semibold text-yellow-800 mb-2">Chú ý:</h3>
+                <p class="text-sm text-yellow-700">
+                    OAuth sẽ hoạt động khi bạn đã cấu hình đúng Client ID và Secret từ Facebook và Google.
+                    Hiện tại đang sử dụng giá trị placeholder trong file .env.
+                </p>
+            </div>
+        </div>
+        
+        <div class="mt-6 text-center">
+            <a href="auth.html" class="text-blue-600 hover:text-blue-800 underline">
+                ← Quay lại trang đăng nhập
+            </a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thư Viện Thể Loại - Sách Hay Mỗi Ngày</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+        .category-card { 
+            transition: all 0.3s ease; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .category-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+        }
+        .category-card:nth-child(even) { 
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .category-card:nth-child(3n) { 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .category-card:nth-child(4n) { 
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        .category-card:nth-child(5n) { 
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        .category-card:nth-child(6n) { 
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+        .loading-skeleton { 
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); 
+            background-size: 200% 100%; 
+            animation: loading 1.5s infinite; 
+        }
+        @keyframes loading { 
+            0% { background-position: 200% 0; } 
+            100% { background-position: -200% 0; } 
+        }
+        .dark .loading-skeleton { 
+            background: linear-gradient(90deg, #374151 25%, #4B5563 50%, #374151 75%); 
+            background-size: 200% 100%; 
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .stats-card:hover::before {
+            opacity: 1;
+        }
+    </style>
+    <script>
+        // Script để áp dụng Dark Mode ngay lập tức
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+
+    <!-- Header -->
+    <header id="main-header" class="sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm dark:border-b dark:border-gray-800">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <i data-lucide="book-open" class="text-blue-600"></i><span>Sách Hay</span>
+            </a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="index.html" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white">Khám Phá</a>
+                <a href="categories.html" class="text-blue-600 dark:text-blue-400 font-semibold">Thể Loại</a>
+                <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white">Tác Giả</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="theme-toggle" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <i id="theme-toggle-dark-icon" class="hidden" data-lucide="moon"></i>
+                    <i id="theme-toggle-light-icon" class="hidden" data-lucide="sun"></i>
+                </button>
+                <div id="user-actions"></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+        <!-- Hero Section -->
+        <section class="text-center mb-16">
+            <div class="mb-8">
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+                    Thư Viện Thể Loại
+                </h1>
+                <p class="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                    Khám phá hàng ngàn cuốn sách được phân loại theo các chủ đề đa dạng. 
+                    Tìm kiếm tri thức trong lĩnh vực bạn yêu thích.
+                </p>
+            </div>
+            
+            <!-- Search Box -->
+            <div class="max-w-2xl mx-auto mb-8">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="search-categories" 
+                        placeholder="Tìm kiếm thể loại..." 
+                        class="w-full px-6 py-4 text-lg border border-gray-300 dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                    >
+                    <button class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-blue-600">
+                        <i data-lucide="search" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistics -->
+        <section class="mb-16">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="stats-card text-white p-6 rounded-lg shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-white/80 text-sm font-medium">Tổng Thể Loại</p>
+                            <p id="total-categories" class="text-3xl font-bold">0</p>
+                        </div>
+                        <i data-lucide="folder" class="w-10 h-10 text-white/80"></i>
+                    </div>
+                </div>
+                
+                <div class="stats-card text-white p-6 rounded-lg shadow-lg" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-white/80 text-sm font-medium">Tổng Sách</p>
+                            <p id="total-books" class="text-3xl font-bold">0</p>
+                        </div>
+                        <i data-lucide="book" class="w-10 h-10 text-white/80"></i>
+                    </div>
+                </div>
+                
+                <div class="stats-card text-white p-6 rounded-lg shadow-lg" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-white/80 text-sm font-medium">Phổ Biến Nhất</p>
+                            <p id="most-popular" class="text-lg font-bold">Đang tải...</p>
+                        </div>
+                        <i data-lucide="trending-up" class="w-10 h-10 text-white/80"></i>
+                    </div>
+                </div>
+                
+                <div class="stats-card text-white p-6 rounded-lg shadow-lg" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-white/80 text-sm font-medium">Mới Nhất</p>
+                            <p id="newest-category" class="text-lg font-bold">Đang tải...</p>
+                        </div>
+                        <i data-lucide="plus-circle" class="w-10 h-10 text-white/80"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filter and Sort -->
+        <section class="mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex flex-wrap gap-4">
+                    <select id="sort-categories" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                        <option value="name">Sắp xếp theo: Tên A-Z</option>
+                        <option value="books_count">Sắp xếp theo: Số lượng sách</option>
+                        <option value="created_at">Sắp xếp theo: Mới nhất</option>
+                    </select>
+                    
+                    <select id="filter-categories" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                        <option value="all">Tất cả thể loại</option>
+                        <option value="popular">Phổ biến (>10 sách)</option>
+                        <option value="medium">Trung bình (5-10 sách)</option>
+                        <option value="small">Ít sách (<5 sách)</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button id="grid-view" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 bg-gray-100 dark:bg-gray-800">
+                        <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+                    </button>
+                    <button id="list-view" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <i data-lucide="list" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories Grid -->
+        <section id="categories-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <!-- Loading skeletons -->
+            <div class="loading-skeleton rounded-lg h-48"></div>
+            <div class="loading-skeleton rounded-lg h-48"></div>
+            <div class="loading-skeleton rounded-lg h-48"></div>
+            <div class="loading-skeleton rounded-lg h-48"></div>
+            <div class="loading-skeleton rounded-lg h-48"></div>
+            <div class="loading-skeleton rounded-lg h-48"></div>
+            <div class="loading-skeleton rounded-lg h-48"></div>
+            <div class="loading-skeleton rounded-lg h-48"></div>
+        </section>
+
+        <!-- Categories List -->
+        <section id="categories-list" class="hidden space-y-4">
+            <!-- List items will be populated here -->
+        </section>
+
+        <!-- Load More Button -->
+        <div class="text-center mt-12">
+            <button id="load-more" class="hidden px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <span id="load-more-text">Tải thêm</span>
+                <i id="load-more-icon" class="hidden w-5 h-5 ml-2 animate-spin" data-lucide="loader"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 dark:bg-black/50 text-white mt-16">
+        <div class="container mx-auto px-6 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i data-lucide="book-open" class="text-blue-400 w-8 h-8"></i>
+                        <span class="text-xl font-bold">Sách Hay</span>
+                    </div>
+                    <p class="text-gray-400">Nền tảng đọc sách trực tuyến hàng đầu Việt Nam</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Khám phá</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="index.html" class="hover:text-white">Trang chủ</a></li>
+                        <li><a href="categories.html" class="hover:text-white">Thể loại</a></li>
+                        <li><a href="#" class="hover:text-white">Tác giả</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Thể loại phổ biến</h4>
+                    <ul id="footer-categories" class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Đang tải...</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Hỗ trợ</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Liên hệ</a></li>
+                        <li><a href="#" class="hover:text-white">Hướng dẫn</a></li>
+                        <li><a href="#" class="hover:text-white">Điều khoản</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 Sách Hay. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:8000/api';
+        let allCategories = [];
+        let currentView = 'grid';
+        let currentSort = 'name';
+        let currentFilter = 'all';
+        let currentPage = 1;
+        let currentUser = null;
+
+        // DOM Elements
+        const elementsCache = {
+            categoriesGrid: document.getElementById('categories-grid'),
+            categoriesList: document.getElementById('categories-list'),
+            searchInput: document.getElementById('search-categories'),
+            sortSelect: document.getElementById('sort-categories'),
+            filterSelect: document.getElementById('filter-categories'),
+            gridViewBtn: document.getElementById('grid-view'),
+            listViewBtn: document.getElementById('list-view'),
+            loadMoreBtn: document.getElementById('load-more'),
+            loadMoreText: document.getElementById('load-more-text'),
+            loadMoreIcon: document.getElementById('load-more-icon'),
+            userActions: document.getElementById('user-actions'),
+            themeToggleBtn: document.getElementById('theme-toggle'),
+            darkIcon: document.getElementById('theme-toggle-dark-icon'),
+            lightIcon: document.getElementById('theme-toggle-light-icon'),
+            totalCategories: document.getElementById('total-categories'),
+            totalBooks: document.getElementById('total-books'),
+            mostPopular: document.getElementById('most-popular'),
+            newestCategory: document.getElementById('newest-category'),
+            footerCategories: document.getElementById('footer-categories')
+        };
+
+        // Theme Management
+        function initTheme() {
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                elementsCache.lightIcon.classList.remove('hidden');
+            } else {
+                elementsCache.darkIcon.classList.remove('hidden');
+            }
+
+            elementsCache.themeToggleBtn.addEventListener('click', () => {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                    elementsCache.darkIcon.classList.remove('hidden');
+                    elementsCache.lightIcon.classList.add('hidden');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                    elementsCache.lightIcon.classList.remove('hidden');
+                    elementsCache.darkIcon.classList.add('hidden');
+                }
+            });
+        }
+
+        // Auth Management
+        function checkAuth() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('currentUser');
+            
+            if (token && user) {
+                currentUser = JSON.parse(user);
+                return true;
+            }
+            return false;
+        }
+
+        function updateAuthUI() {
+            const isLoggedIn = checkAuth();
+            
+            if (isLoggedIn) {
+                // Get avatar URL or use default
+                const avatarUrl = currentUser.avatar 
+                    ? `http://localhost:8000/storage/${currentUser.avatar}`
+                    : `https://i.pravatar.cc/150?u=${currentUser.email || 'default'}`;
+                
+                elementsCache.userActions.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <div class="relative group">
+                            <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                                <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-600">
+                                    <img src="${avatarUrl}" alt="${currentUser.name}" class="w-full h-full object-cover">
+                                </div>
+                                <span class="hidden md:block text-gray-700 dark:text-gray-300">${currentUser.name}</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-700 py-1 hidden group-hover:block">
+                                <a href="profile.html" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    <i data-lucide="user" class="w-4 h-4 inline mr-2"></i>Thông tin cá nhân
+                                </a>
+                                <a href="library.html" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    <i data-lucide="bookmark" class="w-4 h-4 inline mr-2"></i>Thư viện của tôi
+                                </a>
+                                <a href="#" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    <i data-lucide="settings" class="w-4 h-4 inline mr-2"></i>Cài đặt
+                                </a>
+                                <hr class="my-1">
+                                <button onclick="logout()" class="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    <i data-lucide="log-out" class="w-4 h-4 inline mr-2"></i>Đăng xuất
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                elementsCache.userActions.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <a href="auth.html" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white">Đăng nhập</a>
+                        <a href="auth.html" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">Đăng ký</a>
+                    </div>
+                `;
+            }
+            
+            // Re-initialize Lucide icons after updating HTML
+            setTimeout(() => {
+                lucide.createIcons();
+            }, 100);
+        }
+
+        // Add updateAvatarDisplay function for cross-page avatar updates
+        window.updateAvatarDisplay = function() {
+            updateAuthUI();
+        };
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            updateAuthUI();
+        }
+
+        function showLoginModal() {
+            window.location.href = 'auth.html';
+        }
+
+        function showRegisterModal() {
+            window.location.href = 'auth.html?mode=register';
+        }
+
+        // API Functions
+        async function apiRequest(endpoint, options = {}) {
+            const token = localStorage.getItem('authToken');
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                }
+            };
+
+            const config = { ...defaultOptions, ...options };
+            if (config.body && typeof config.body === 'object') {
+                config.body = JSON.stringify(config.body);
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API request failed:', error);
+                throw error;
+            }
+        }
+
+        // Load Categories
+        async function loadCategories() {
+            try {
+                showLoadingSkeleton();
+                const response = await apiRequest('/categories');
+                
+                if (response.success) {
+                    allCategories = response.data || [];
+                    displayCategories();
+                    updateStats();
+                } else {
+                    throw new Error('Failed to load categories');
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                displayError();
+            }
+        }
+
+        function showLoadingSkeleton() {
+            elementsCache.categoriesGrid.innerHTML = Array(8).fill(0).map(() => 
+                '<div class="loading-skeleton rounded-lg h-48"></div>'
+            ).join('');
+        }
+
+        function displayCategories() {
+            let categories = [...allCategories];
+            
+            // Apply search filter
+            const searchTerm = elementsCache.searchInput.value.toLowerCase();
+            if (searchTerm) {
+                categories = categories.filter(cat => 
+                    cat.name.toLowerCase().includes(searchTerm) ||
+                    (cat.description && cat.description.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            // Apply category filter
+            if (currentFilter !== 'all') {
+                categories = categories.filter(cat => {
+                    const bookCount = cat.books_count || 0;
+                    switch (currentFilter) {
+                        case 'popular': return bookCount > 10;
+                        case 'medium': return bookCount >= 5 && bookCount <= 10;
+                        case 'small': return bookCount < 5;
+                        default: return true;
+                    }
+                });
+            }
+
+            // Apply sorting
+            categories.sort((a, b) => {
+                switch (currentSort) {
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'books_count':
+                        return (b.books_count || 0) - (a.books_count || 0);
+                    case 'created_at':
+                        return new Date(b.created_at) - new Date(a.created_at);
+                    default:
+                        return 0;
+                }
+            });
+
+            if (currentView === 'grid') {
+                displayCategoriesGrid(categories);
+            } else {
+                displayCategoriesList(categories);
+            }
+        }
+
+        function displayCategoriesGrid(categories) {
+            elementsCache.categoriesGrid.classList.remove('hidden');
+            elementsCache.categoriesList.classList.add('hidden');
+            
+            if (categories.length === 0) {
+                elementsCache.categoriesGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i data-lucide="folder-x" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                        <p class="text-gray-600 dark:text-gray-400">Không tìm thấy thể loại nào.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            elementsCache.categoriesGrid.innerHTML = categories.map((category, index) => {
+                const bookCount = category.books_count || 0;
+                const gradientClass = getGradientClass(index);
+                
+                return `
+                    <div class="category-card rounded-lg p-6 text-white cursor-pointer" style="${gradientClass}" onclick="viewCategory(${category.id})">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                                ${getCategoryIcon(category.name)}
+                            </div>
+                            <span class="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">
+                                ${bookCount} sách
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">${category.name}</h3>
+                        <p class="text-white/80 text-sm mb-4 line-clamp-2">
+                            ${category.description || 'Khám phá các cuốn sách thuộc thể loại ' + category.name}
+                        </p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium">Xem chi tiết</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayCategoriesList(categories) {
+            elementsCache.categoriesGrid.classList.add('hidden');
+            elementsCache.categoriesList.classList.remove('hidden');
+            
+            if (categories.length === 0) {
+                elementsCache.categoriesList.innerHTML = `
+                    <div class="text-center py-12">
+                        <i data-lucide="folder-x" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                        <p class="text-gray-600 dark:text-gray-400">Không tìm thấy thể loại nào.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            elementsCache.categoriesList.innerHTML = categories.map(category => {
+                const bookCount = category.books_count || 0;
+                
+                return `
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex items-center justify-between cursor-pointer hover:shadow-lg transition-shadow" onclick="viewCategory(${category.id})">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white">
+                                ${getCategoryIcon(category.name)}
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">${category.name}</h3>
+                                <p class="text-gray-600 dark:text-gray-400 mt-1">
+                                    ${category.description || 'Khám phá các cuốn sách thuộc thể loại ' + category.name}
+                                </p>
+                                <div class="flex items-center mt-2 space-x-4">
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                                        <i data-lucide="book" class="w-4 h-4 inline mr-1"></i>
+                                        ${bookCount} sách
+                                    </span>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                                        <i data-lucide="calendar" class="w-4 h-4 inline mr-1"></i>
+                                        ${new Date(category.created_at).toLocaleDateString('vi-VN')}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button class="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getGradientClass(index) {
+            const gradients = [
+                'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                'background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                'background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                'background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                'background: linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                'background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                'background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+                'background: linear-gradient(135deg, #ff8a80 0%, #ea4c89 100%)'
+            ];
+            return gradients[index % gradients.length];
+        }
+
+        function getCategoryIcon(categoryName) {
+            const icons = {
+                'Văn học': '<i data-lucide="book-open" class="w-6 h-6"></i>',
+                'Khoa học': '<i data-lucide="microscope" class="w-6 h-6"></i>',
+                'Kinh tế': '<i data-lucide="trending-up" class="w-6 h-6"></i>',
+                'Công nghệ': '<i data-lucide="cpu" class="w-6 h-6"></i>',
+                'Lịch sử': '<i data-lucide="scroll" class="w-6 h-6"></i>',
+                'Nghệ thuật': '<i data-lucide="palette" class="w-6 h-6"></i>',
+                'Thể thao': '<i data-lucide="trophy" class="w-6 h-6"></i>',
+                'Nấu ăn': '<i data-lucide="chef-hat" class="w-6 h-6"></i>',
+                'Du lịch': '<i data-lucide="map" class="w-6 h-6"></i>',
+                'Sức khỏe': '<i data-lucide="heart" class="w-6 h-6"></i>'
+            };
+            return icons[categoryName] || '<i data-lucide="folder" class="w-6 h-6"></i>';
+        }
+
+        function displayError() {
+            elementsCache.categoriesGrid.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <i data-lucide="alert-circle" class="w-16 h-16 text-red-400 mx-auto mb-4"></i>
+                    <p class="text-gray-600 dark:text-gray-400">Đã xảy ra lỗi khi tải thể loại. Vui lòng thử lại.</p>
+                    <button onclick="loadCategories()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        Thử lại
+                    </button>
+                </div>
+            `;
+        }
+
+        function updateStats() {
+            const totalCategories = allCategories.length;
+            const totalBooks = allCategories.reduce((sum, cat) => sum + (cat.books_count || 0), 0);
+            const mostPopular = allCategories.reduce((prev, current) => 
+                (prev.books_count || 0) > (current.books_count || 0) ? prev : current
+            );
+            const newest = allCategories.reduce((prev, current) => 
+                new Date(prev.created_at) > new Date(current.created_at) ? prev : current
+            );
+
+            elementsCache.totalCategories.textContent = totalCategories;
+            elementsCache.totalBooks.textContent = totalBooks;
+            elementsCache.mostPopular.textContent = mostPopular?.name || 'Không có';
+            elementsCache.newestCategory.textContent = newest?.name || 'Không có';
+
+            // Update footer
+            const topCategories = allCategories
+                .sort((a, b) => (b.books_count || 0) - (a.books_count || 0))
+                .slice(0, 5);
+                
+            elementsCache.footerCategories.innerHTML = topCategories.map(cat => 
+                `<li><a href="#" onclick="viewCategory(${cat.id})" class="hover:text-white">${cat.name}</a></li>`
+            ).join('');
+        }
+
+        // View Category
+        function viewCategory(categoryId) {
+            window.location.href = `category.html?category=${categoryId}`;
+        }
+
+        // View Toggle
+        function toggleView(view) {
+            currentView = view;
+            
+            if (view === 'grid') {
+                elementsCache.gridViewBtn.classList.add('bg-gray-100', 'dark:bg-gray-800');
+                elementsCache.listViewBtn.classList.remove('bg-gray-100', 'dark:bg-gray-800');
+            } else {
+                elementsCache.listViewBtn.classList.add('bg-gray-100', 'dark:bg-gray-800');
+                elementsCache.gridViewBtn.classList.remove('bg-gray-100', 'dark:bg-gray-800');
+            }
+            
+            displayCategories();
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Search
+            elementsCache.searchInput.addEventListener('input', debounce(displayCategories, 300));
+            
+            // Sort and Filter
+            elementsCache.sortSelect.addEventListener('change', (e) => {
+                currentSort = e.target.value;
+                displayCategories();
+            });
+            
+            elementsCache.filterSelect.addEventListener('change', (e) => {
+                currentFilter = e.target.value;
+                displayCategories();
+            });
+            
+            // View Toggle
+            elementsCache.gridViewBtn.addEventListener('click', () => toggleView('grid'));
+            elementsCache.listViewBtn.addEventListener('click', () => toggleView('list'));
+        }
+
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            initTheme();
+            updateAuthUI();
+            setupEventListeners();
+            
+            await loadCategories();
+            
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

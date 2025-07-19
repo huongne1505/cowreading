@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập & Đăng Ký - Sách Hay Mỗi Ngày</title>
+
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tải phông chữ từ Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Tải icon từ Lucide -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        .form-container {
+            transition: all 0.5s ease-in-out;
+        }
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .error-message {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <div class="flex min-h-screen">
+        <!-- Cột bên trái - Form -->
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-12">
+            <div class="w-full max-w-md">
+                <a href="index.html" class="text-3xl font-bold text-gray-900 flex items-center justify-center gap-2 mb-8">
+                    <i data-lucide="book-open" class="text-blue-600"></i>
+                    <span>Sách Hay</span>
+                </a>
+
+                <!-- Form Container -->
+                <div id="form-wrapper">
+                    <!-- Form Đăng Nhập -->
+                    <div id="login-form-container" class="form-container">
+                        <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">Chào mừng trở lại!</h2>
+                        <p class="text-center text-gray-500 mb-6">Đăng nhập để tiếp tục hành trình của bạn.</p>
+                        
+                        <!-- Error message -->
+                        <div id="login-error" class="hidden mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md error-message">
+                            <div class="flex items-center">
+                                <i data-lucide="alert-circle" class="w-5 h-5 mr-2"></i>
+                                <span id="login-error-text"></span>
+                            </div>
+                        </div>
+
+                        <form id="login-form">
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
+                                    <input type="email" id="login-email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required placeholder="email@example.com">
+                                </div>
+                                <div>
+                                    <label for="login-password" class="block text-sm font-medium text-gray-700">Mật khẩu</label>
+                                    <div class="relative">
+                                        <input type="password" id="login-password" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required placeholder="••••••••">
+                                        <button type="button" id="toggle-login-password" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                            <i data-lucide="eye" class="w-5 h-5 text-gray-400"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mt-4">
+                                <div class="flex items-center">
+                                    <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <label for="remember-me" class="ml-2 block text-sm text-gray-900"> Ghi nhớ tôi </label>
+                                </div>
+                                <div class="text-sm">
+                                    <a href="#" class="font-medium text-blue-600 hover:text-blue-500"> Quên mật khẩu? </a>
+                                </div>
+                            </div>
+                            <button type="submit" id="login-submit" class="w-full mt-6 bg-blue-600 text-white py-2.5 px-4 rounded-md hover:bg-blue-700 font-semibold flex items-center justify-center">
+                                <span id="login-submit-text">Đăng Nhập</span>
+                                <i id="login-loading" data-lucide="loader" class="w-5 h-5 ml-2 animate-spin hidden"></i>
+                            </button>
+                        </form>
+                        <div class="mt-6">
+                            <div class="relative">
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="w-full border-t border-gray-300"></div>
+                                </div>
+                                <div class="relative flex justify-center text-sm">
+                                    <span class="px-2 bg-gray-50 text-gray-500"> Hoặc đăng nhập với </span>
+                                </div>
+                            </div>
+                            <div class="mt-6 grid grid-cols-2 gap-3">
+                                <div>
+                                    <button onclick="loginWithFacebook()" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <i data-lucide="facebook" class="w-5 h-5 text-blue-700"></i><span class="ml-2">Facebook</span>
+                                    </button>
+                                </div>
+                                <div>
+                                    <button onclick="loginWithGoogle()" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <i data-lucide="chrome" class="w-5 h-5 text-red-600"></i><span class="ml-2">Google</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-8 text-center text-sm text-gray-600">
+                            Chưa có tài khoản?
+                            <button id="show-register-btn" class="font-medium text-blue-600 hover:text-blue-500">Đăng ký ngay</button>
+                        </p>
+                    </div>
+
+                    <!-- Form Đăng Ký -->
+                    <div id="register-form-container" class="form-container hidden">
+                        <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">Tạo tài khoản mới</h2>
+                        <p class="text-center text-gray-500 mb-6">Bắt đầu hành trình khám phá tri thức của bạn.</p>
+                        
+                        <!-- Error message -->
+                        <div id="register-error" class="hidden mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md error-message">
+                            <div class="flex items-center">
+                                <i data-lucide="alert-circle" class="w-5 h-5 mr-2"></i>
+                                <span id="register-error-text"></span>
+                            </div>
+                        </div>
+
+                        <!-- Success message -->
+                        <div id="register-success" class="hidden mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-md">
+                            <div class="flex items-center">
+                                <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i>
+                                <span>Đăng ký thành công! Vui lòng đăng nhập.</span>
+                            </div>
+                        </div>
+
+                        <form id="register-form">
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="register-name" class="block text-sm font-medium text-gray-700">Họ và tên</label>
+                                    <input type="text" id="register-name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required placeholder="Nguyễn Văn A">
+                                </div>
+                                <div>
+                                    <label for="register-email" class="block text-sm font-medium text-gray-700">Email</label>
+                                    <input type="email" id="register-email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required placeholder="email@example.com">
+                                </div>
+                                <div>
+                                    <label for="register-password" class="block text-sm font-medium text-gray-700">Mật khẩu</label>
+                                    <div class="relative">
+                                        <input type="password" id="register-password" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required placeholder="••••••••">
+                                        <button type="button" id="toggle-register-password" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                            <i data-lucide="eye" class="w-5 h-5 text-gray-400"></i>
+                                        </button>
+                                    </div>
+                                    <p class="mt-1 text-sm text-gray-500">Mật khẩu phải có ít nhất 8 ký tự</p>
+                                </div>
+                                <div>
+                                    <label for="register-password-confirm" class="block text-sm font-medium text-gray-700">Xác nhận mật khẩu</label>
+                                    <div class="relative">
+                                        <input type="password" id="register-password-confirm" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required placeholder="••••••••">
+                                        <button type="button" id="toggle-register-password-confirm" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                            <i data-lucide="eye" class="w-5 h-5 text-gray-400"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" id="register-submit" class="w-full mt-6 bg-blue-600 text-white py-2.5 px-4 rounded-md hover:bg-blue-700 font-semibold flex items-center justify-center">
+                                <span id="register-submit-text">Đăng Ký</span>
+                                <i id="register-loading" data-lucide="loader" class="w-5 h-5 ml-2 animate-spin hidden"></i>
+                            </button>
+                        </form>
+                        <div class="mt-6">
+                            <div class="relative">
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="w-full border-t border-gray-300"></div>
+                                </div>
+                                <div class="relative flex justify-center text-sm">
+                                    <span class="px-2 bg-gray-50 text-gray-500"> Hoặc đăng ký với </span>
+                                </div>
+                            </div>
+                            <div class="mt-6 grid grid-cols-2 gap-3">
+                                <div>
+                                    <button onclick="loginWithFacebook()" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <i data-lucide="facebook" class="w-5 h-5 text-blue-700"></i><span class="ml-2">Facebook</span>
+                                    </button>
+                                </div>
+                                <div>
+                                    <button onclick="loginWithGoogle()" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <i data-lucide="chrome" class="w-5 h-5 text-red-600"></i><span class="ml-2">Google</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-4 text-center text-xs text-gray-500">
+                            Bằng việc đăng ký, bạn đồng ý với
+                            <a href="#" class="underline">Điều khoản Dịch vụ</a> và
+                            <a href="#" class="underline">Chính sách Bảo mật</a> của chúng tôi.
+                        </p>
+                        <p class="mt-8 text-center text-sm text-gray-600">
+                            Đã có tài khoản?
+                            <button id="show-login-btn" class="font-medium text-blue-600 hover:text-blue-500">Đăng nhập</button>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột bên phải - Hình ảnh -->
+        <div class="hidden lg:flex w-1/2 bg-blue-600 items-center justify-center relative p-12">
+            <div class="absolute inset-0 bg-black opacity-20"></div>
+            <img src="https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=1887&auto=format&fit=crop" alt="Một người đang đọc sách" class="absolute h-full w-full object-cover">
+            <div class="relative z-10 text-white text-center">
+                <i data-lucide="library" class="w-24 h-24 mx-auto mb-6"></i>
+                <h1 class="text-4xl font-bold mb-4">Thư Viện Tri Thức Trong Tầm Tay</h1>
+                <p class="text-lg text-blue-100">Tham gia cộng đồng của chúng tôi và khám phá hàng ngàn cuốn sách hấp dẫn đang chờ bạn.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:8000/api';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginFormContainer = document.getElementById('login-form-container');
+            const registerFormContainer = document.getElementById('register-form-container');
+            const showRegisterBtn = document.getElementById('show-register-btn');
+            const showLoginBtn = document.getElementById('show-login-btn');
+
+            // Form switching
+            const switchToRegister = () => {
+                loginFormContainer.classList.add('hidden');
+                registerFormContainer.classList.remove('hidden');
+                // Clear any messages
+                hideMessage('login-error');
+                hideMessage('register-error');
+                hideMessage('register-success');
+            };
+
+            const switchToLogin = () => {
+                registerFormContainer.classList.add('hidden');
+                loginFormContainer.classList.remove('hidden');
+                // Clear any messages
+                hideMessage('login-error');
+                hideMessage('register-error');
+                hideMessage('register-success');
+            };
+
+            showRegisterBtn.addEventListener('click', switchToRegister);
+            showLoginBtn.addEventListener('click', switchToLogin);
+
+            // Password toggle functionality
+            const togglePassword = (inputId, toggleId) => {
+                const input = document.getElementById(inputId);
+                const toggle = document.getElementById(toggleId);
+                const icon = toggle.querySelector('i');
+
+                toggle.addEventListener('click', () => {
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+                    
+                    if (type === 'password') {
+                        icon.setAttribute('data-lucide', 'eye');
+                    } else {
+                        icon.setAttribute('data-lucide', 'eye-off');
+                    }
+                    lucide.createIcons();
+                });
+            };
+
+            togglePassword('login-password', 'toggle-login-password');
+            togglePassword('register-password', 'toggle-register-password');
+            togglePassword('register-password-confirm', 'toggle-register-password-confirm');
+
+            // Utility functions
+            const showMessage = (elementId, message) => {
+                const element = document.getElementById(elementId);
+                const textElement = document.getElementById(elementId + '-text');
+                if (textElement) {
+                    textElement.textContent = message;
+                }
+                element.classList.remove('hidden');
+            };
+
+            const hideMessage = (elementId) => {
+                const element = document.getElementById(elementId);
+                element.classList.add('hidden');
+            };
+
+            const setLoading = (formType, isLoading) => {
+                const submitBtn = document.getElementById(formType + '-submit');
+                const submitText = document.getElementById(formType + '-submit-text');
+                const loadingIcon = document.getElementById(formType + '-loading');
+
+                if (isLoading) {
+                    submitBtn.classList.add('loading');
+                    submitText.textContent = formType === 'login' ? 'Đang đăng nhập...' : 'Đang đăng ký...';
+                    loadingIcon.classList.remove('hidden');
+                } else {
+                    submitBtn.classList.remove('loading');
+                    submitText.textContent = formType === 'login' ? 'Đăng Nhập' : 'Đăng Ký';
+                    loadingIcon.classList.add('hidden');
+                }
+            };
+
+            // API functions
+            const apiRequest = async (endpoint, options = {}) => {
+                console.log('API Request:', {
+                    url: `${API_BASE_URL}${endpoint}`,
+                    method: options.method || 'GET',
+                    body: options.body
+                });
+                
+                const defaultOptions = {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                };
+
+                const config = { ...defaultOptions, ...options };
+                if (config.body && typeof config.body === 'object') {
+                    config.body = JSON.stringify(config.body);
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+                    console.log('API Response Status:', response.status);
+                    
+                    const data = await response.json();
+                    console.log('API Response Data:', data);
+                    
+                    if (!response.ok) {
+                        // Handle validation errors (422) specially
+                        if (response.status === 422 && data.errors) {
+                            const firstError = Object.values(data.errors)[0];
+                            const errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
+                            throw new Error(errorMessage);
+                        }
+                        throw new Error(data.message || 'Có lỗi xảy ra');
+                    }
+                    
+                    return data;
+                } catch (error) {
+                    console.error('API request failed:', error);
+                    throw error;
+                }
+            };
+
+            // Login form handler
+            document.getElementById('login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                const remember = document.getElementById('remember-me').checked;
+
+                hideMessage('login-error');
+                setLoading('login', true);
+
+                try {
+                    const response = await apiRequest('/auth/login', {
+                        method: 'POST',
+                        body: {
+                            email,
+                            password,
+                            remember
+                        }
+                    });
+
+                    if (response.success) {
+                        // Store auth data
+                        console.log('Login successful, storing data:', response.data);
+                        localStorage.setItem('authToken', response.data.token);
+                        localStorage.setItem('currentUser', JSON.stringify(response.data.user));
+                        localStorage.setItem('isLoggedIn', 'true');
+                        
+                        console.log('Data stored in localStorage:');
+                        console.log('- authToken:', localStorage.getItem('authToken'));
+                        console.log('- currentUser:', localStorage.getItem('currentUser'));
+                        console.log('- isLoggedIn:', localStorage.getItem('isLoggedIn'));
+
+                        // Redirect to profile page
+                        console.log('Redirecting to profile.html...');
+                        window.location.href = 'profile.html';
+                    } else {
+                        showMessage('login-error', response.message || 'Đăng nhập thất bại');
+                    }
+                } catch (error) {
+                    showMessage('login-error', error.message || 'Có lỗi xảy ra, vui lòng thử lại');
+                } finally {
+                    setLoading('login', false);
+                }
+            });
+
+            // Register form handler
+            document.getElementById('register-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const name = document.getElementById('register-name').value;
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                const passwordConfirm = document.getElementById('register-password-confirm').value;
+
+                hideMessage('register-error');
+                hideMessage('register-success');
+
+                // Client-side validation
+                if (password !== passwordConfirm) {
+                    showMessage('register-error', 'Mật khẩu xác nhận không khớp');
+                    return;
+                }
+
+                if (password.length < 8) {
+                    showMessage('register-error', 'Mật khẩu phải có ít nhất 8 ký tự');
+                    return;
+                }
+
+                setLoading('register', true);
+
+                try {
+                    const response = await apiRequest('/auth/register', {
+                        method: 'POST',
+                        body: {
+                            name,
+                            email,
+                            password,
+                            password_confirmation: passwordConfirm
+                        }
+                    });
+
+                    if (response.success) {
+                        // Show success message
+                        showMessage('register-success', 'Đăng ký thành công! Vui lòng đăng nhập.');
+                        
+                        // Clear form
+                        document.getElementById('register-form').reset();
+                        
+                        // Switch to login after 2 seconds
+                        setTimeout(() => {
+                            switchToLogin();
+                        }, 2000);
+                    } else {
+                        showMessage('register-error', response.message || 'Đăng ký thất bại');
+                    }
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    let errorMessage = 'Có lỗi xảy ra, vui lòng thử lại';
+                    
+                    if (error.message) {
+                        errorMessage = error.message;
+                    }
+                    
+                    showMessage('register-error', errorMessage);
+                } finally {
+                    setLoading('register', false);
+                }
+            });
+
+            // Check if user is already logged in with valid token
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            const authToken = localStorage.getItem('authToken');
+            
+            if (isLoggedIn && authToken) {
+                // Verify token is still valid before redirecting
+                fetch('http://localhost:3000/api/user', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Token is valid, redirect to homepage
+                        window.location.href = 'index.html';
+                    } else {
+                        // Token is invalid, clear storage and stay on auth page
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('currentUser');
+                        localStorage.removeItem('isLoggedIn');
+                    }
+                })
+                .catch(() => {
+                    // Error checking token, clear storage and stay on auth page
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('currentUser');
+                    localStorage.removeItem('isLoggedIn');
+                });
+            }
+
+            // OAuth functions
+            window.loginWithFacebook = function() {
+                window.location.href = `${API_BASE_URL}/auth/facebook`;
+            };
+
+            window.loginWithGoogle = function() {
+                window.location.href = `${API_BASE_URL}/auth/google`;
+            };
+
+            // Handle OAuth callback
+            function handleOAuthCallback() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const userParam = urlParams.get('user');
+                const error = urlParams.get('error');
+
+                if (error) {
+                    if (error === 'oauth_failed') {
+                        showMessage('login-error', 'Đăng nhập thất bại. Vui lòng thử lại.');
+                    }
+                    // Clean URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    return;
+                }
+
+                if (token && userParam) {
+                    try {
+                        const user = JSON.parse(decodeURIComponent(userParam));
+                        
+                        // Save to localStorage
+                        localStorage.setItem('authToken', token);
+                        localStorage.setItem('currentUser', JSON.stringify(user));
+                        localStorage.setItem('isLoggedIn', 'true');
+                        
+                        // Clean URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        
+                        // Redirect to home page
+                        window.location.href = 'index.html';
+                    } catch (e) {
+                        console.error('Error parsing user data:', e);
+                        showMessage('login-error', 'Có lỗi xảy ra. Vui lòng thử lại.');
+                    }
+                }
+            }
+
+            // Check URL parameters for form switching and OAuth callback
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            
+            // Handle OAuth callback first
+            handleOAuthCallback();
+            
+            if (mode === 'register') {
+                switchToRegister();
+            }
+
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

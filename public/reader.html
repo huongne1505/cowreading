@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đọc Sách - CowReading</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        .reading-content {
+            font-size: 18px;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+    <!-- Reading Interface -->
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center">
+                        <button onclick="toggleSidebar()" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                        <h1 class="ml-4 text-xl font-semibold text-gray-900 dark:text-white" id="book-title">Đang tải...</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="toggleBookmarks()" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i data-lucide="bookmark" class="w-6 h-6"></i>
+                        </button>
+                        <button onclick="toggleSettings()" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i data-lucide="settings" class="w-6 h-6"></i>
+                        </button>
+                        <a href="/" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i data-lucide="home" class="w-6 h-6"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex">
+            <!-- Sidebar -->
+            <div id="sidebar" class="sidebar fixed inset-y-0 left-0 z-50 w-80 bg-white dark:bg-gray-800 shadow-lg transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0">
+                <div class="h-full flex flex-col">
+                    <!-- Sidebar Header -->
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Mục Lục</h2>
+                    </div>
+                    
+                    <!-- Chapters List -->
+                    <div class="flex-1 overflow-y-auto">
+                        <div id="chapters-list" class="p-4 space-y-2">
+                            <!-- Chapters will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Progress -->
+                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                        <div class="mb-2">
+                            <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                                <span>Tiến độ đọc</span>
+                                <span id="progress-text">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
+                                <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 lg:ml-0">
+                <div class="min-h-screen bg-white dark:bg-gray-900">
+                    <div class="max-w-4xl mx-auto px-6 py-8">
+                        <!-- Chapter Content -->
+                        <div id="chapter-content" class="reading-content prose prose-lg dark:prose-invert max-w-none">
+                            <div class="flex items-center justify-center h-64">
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Navigation -->
+                        <div class="flex justify-between items-center mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+                            <button id="prev-chapter" onclick="goToPrevChapter()" class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i data-lucide="chevron-left" class="w-4 h-4 mr-2"></i>
+                                Chương trước
+                            </button>
+                            
+                            <div class="flex items-center space-x-4">
+                                <button onclick="addBookmark()" class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
+                                    <i data-lucide="bookmark-plus" class="w-5 h-5"></i>
+                                </button>
+                                <button onclick="shareChapter()" class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
+                                    <i data-lucide="share" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            
+                            <button id="next-chapter" onclick="goToNextChapter()" class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Chương tiếp theo
+                                <i data-lucide="chevron-right" class="w-4 h-4 ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Cài Đặt Đọc</h3>
+                    <button onclick="toggleSettings()" class="text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cỡ chữ</label>
+                        <input type="range" id="font-size" min="14" max="24" value="18" class="w-full">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>Nhỏ</span>
+                            <span>Lớn</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Khoảng cách dòng</label>
+                        <input type="range" id="line-height" min="1.4" max="2.4" step="0.1" value="1.8" class="w-full">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>Gần</span>
+                            <span>Xa</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chủ đề</label>
+                        <select id="theme-select" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200">
+                            <option value="light">Sáng</option>
+                            <option value="dark">Tối</option>
+                            <option value="sepia">Giấy cũ</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Reading application state
+        let currentBook = null;
+        let currentChapter = null;
+        let chapters = [];
+        let readingProgress = 0;
+        let bookSlug = new URLSearchParams(window.location.search).get('book');
+        let chapterIndex = parseInt(new URLSearchParams(window.location.search).get('chapter')) || 0;
+
+        // Initialize the reading app
+        document.addEventListener('DOMContentLoaded', () => {
+            if (bookSlug) {
+                loadBook(bookSlug);
+            } else {
+                // Redirect to home if no book specified
+                window.location.href = '/';
+            }
+            
+            setupEventListeners();
+            applySettings();
+            lucide.createIcons();
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Settings controls
+            document.getElementById('font-size').addEventListener('input', (e) => {
+                const size = e.target.value + 'px';
+                document.querySelector('.reading-content').style.fontSize = size;
+                localStorage.setItem('reading-font-size', size);
+            });
+
+            document.getElementById('line-height').addEventListener('input', (e) => {
+                const height = e.target.value;
+                document.querySelector('.reading-content').style.lineHeight = height;
+                localStorage.setItem('reading-line-height', height);
+            });
+
+            document.getElementById('theme-select').addEventListener('change', (e) => {
+                applyTheme(e.target.value);
+                localStorage.setItem('reading-theme', e.target.value);
+            });
+
+            // Track reading progress
+            window.addEventListener('scroll', throttle(updateReadingProgress, 100));
+            
+            // Auto-save reading position
+            setInterval(saveReadingPosition, 30000); // Save every 30 seconds
+        }
+
+        // Load book data
+        async function loadBook(slug) {
+            try {
+                const response = await fetch(`/api/books/${slug}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    currentBook = data.data;
+                    document.getElementById('book-title').textContent = currentBook.title;
+                    
+                    // Load chapters
+                    await loadChapters(slug);
+                    
+                    // Load current chapter
+                    if (chapters.length > 0) {
+                        loadChapter(chapterIndex);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading book:', error);
+            }
+        }
+
+        // Load chapters
+        async function loadChapters(slug) {
+            try {
+                const response = await fetch(`/api/books/${slug}/chapters`);
+                if (response.ok) {
+                    const data = await response.json();
+                    chapters = data.data;
+                    renderChaptersList();
+                }
+            } catch (error) {
+                console.error('Error loading chapters:', error);
+            }
+        }
+
+        // Render chapters list
+        function renderChaptersList() {
+            const container = document.getElementById('chapters-list');
+            container.innerHTML = chapters.map((chapter, index) => `
+                <div class="chapter-item ${index === chapterIndex ? 'bg-blue-50 dark:bg-blue-900' : ''} p-3 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                     onclick="loadChapter(${index})">
+                    <h4 class="font-medium text-gray-900 dark:text-white text-sm">${chapter.title}</h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${chapter.word_count || 0} từ</p>
+                </div>
+            `).join('');
+        }
+
+        // Load chapter
+        async function loadChapter(index) {
+            if (index < 0 || index >= chapters.length) return;
+            
+            chapterIndex = index;
+            currentChapter = chapters[index];
+            
+            // Update URL
+            const url = new URL(window.location);
+            url.searchParams.set('chapter', index);
+            window.history.pushState({}, '', url);
+            
+            // Show loading
+            document.getElementById('chapter-content').innerHTML = `
+                <div class="flex items-center justify-center h-64">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch(`/api/chapters/${currentChapter.id}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    renderChapterContent(data.data);
+                    updateNavigationButtons();
+                    updateChaptersList();
+                    
+                    // Record reading session
+                    recordReadingSession();
+                }
+            } catch (error) {
+                console.error('Error loading chapter:', error);
+                document.getElementById('chapter-content').innerHTML = `
+                    <div class="text-center text-red-500 py-8">
+                        Không thể tải nội dung chương
+                    </div>
+                `;
+            }
+        }
+
+        // Render chapter content
+        function renderChapterContent(chapter) {
+            const content = document.getElementById('chapter-content');
+            content.innerHTML = `
+                <article>
+                    <header class="mb-8">
+                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">${chapter.title}</h1>
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <span>Chương ${chapterIndex + 1} / ${chapters.length}</span>
+                            <span class="mx-2">•</span>
+                            <span>${chapter.word_count || 0} từ</span>
+                        </div>
+                    </header>
+                    
+                    <div class="chapter-text">
+                        ${chapter.content || 'Nội dung chương đang được cập nhật...'}
+                    </div>
+                </article>
+            `;
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Update navigation buttons
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prev-chapter');
+            const nextBtn = document.getElementById('next-chapter');
+            
+            prevBtn.disabled = chapterIndex <= 0;
+            nextBtn.disabled = chapterIndex >= chapters.length - 1;
+            
+            if (prevBtn.disabled) {
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            
+            if (nextBtn.disabled) {
+                nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // Update chapters list highlighting
+        function updateChaptersList() {
+            const items = document.querySelectorAll('.chapter-item');
+            items.forEach((item, index) => {
+                if (index === chapterIndex) {
+                    item.classList.add('bg-blue-50', 'dark:bg-blue-900');
+                } else {
+                    item.classList.remove('bg-blue-50', 'dark:bg-blue-900');
+                }
+            });
+        }
+
+        // Navigation functions
+        function goToPrevChapter() {
+            if (chapterIndex > 0) {
+                loadChapter(chapterIndex - 1);
+            }
+        }
+
+        function goToNextChapter() {
+            if (chapterIndex < chapters.length - 1) {
+                loadChapter(chapterIndex + 1);
+            }
+        }
+
+        // UI functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function toggleBookmarks() {
+            // Show bookmarks panel (to be implemented)
+            alert('Tính năng bookmark sẽ được bổ sung');
+        }
+
+        // Reading progress tracking
+        function updateReadingProgress() {
+            const content = document.getElementById('chapter-content');
+            const scrollTop = window.pageYOffset;
+            const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = Math.round((scrollTop / scrollHeight) * 100);
+            
+            if (progress >= 0 && progress <= 100) {
+                readingProgress = progress;
+                updateProgressBar();
+            }
+        }
+
+        function updateProgressBar() {
+            const chapterProgress = (chapterIndex + 1) / chapters.length;
+            const totalProgress = Math.round(chapterProgress * 100);
+            
+            document.getElementById('progress-text').textContent = `${totalProgress}%`;
+            document.getElementById('progress-bar').style.width = `${totalProgress}%`;
+        }
+
+        // Settings functions
+        function applySettings() {
+            const fontSize = localStorage.getItem('reading-font-size') || '18px';
+            const lineHeight = localStorage.getItem('reading-line-height') || '1.8';
+            const theme = localStorage.getItem('reading-theme') || 'light';
+            
+            const content = document.querySelector('.reading-content');
+            content.style.fontSize = fontSize;
+            content.style.lineHeight = lineHeight;
+            
+            document.getElementById('font-size').value = parseInt(fontSize);
+            document.getElementById('line-height').value = lineHeight;
+            document.getElementById('theme-select').value = theme;
+            
+            applyTheme(theme);
+        }
+
+        function applyTheme(theme) {
+            document.body.classList.remove('theme-light', 'theme-dark', 'theme-sepia');
+            document.body.classList.add(`theme-${theme}`);
+            
+            if (theme === 'sepia') {
+                document.body.style.backgroundColor = '#f7f3e9';
+                document.body.style.color = '#5c4e3a';
+            } else if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.body.style.backgroundColor = '';
+                document.body.style.color = '';
+            }
+        }
+
+        // Reading session tracking
+        let readingStartTime = Date.now();
+        let currentSessionId = null;
+
+        async function recordReadingSession() {
+            const authToken = localStorage.getItem('authToken');
+            if (!authToken || !currentBook) return;
+            
+            try {
+                const response = await fetch('/api/reading-progress', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        book_id: currentBook.id,
+                        chapter_id: currentChapter.id,
+                        progress_percentage: Math.round(((chapterIndex + 1) / chapters.length) * 100),
+                        current_page: chapterIndex + 1,
+                        total_pages: chapters.length
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Reading progress saved:', data);
+                }
+            } catch (error) {
+                console.error('Error recording reading session:', error);
+            }
+        }
+
+        function saveReadingPosition() {
+            if (currentBook && currentChapter) {
+                const position = {
+                    bookSlug: currentBook.slug,
+                    chapterIndex: chapterIndex,
+                    scrollPosition: window.pageYOffset,
+                    timestamp: Date.now()
+                };
+                
+                localStorage.setItem('reading-position', JSON.stringify(position));
+                recordReadingSession();
+            }
+        }
+
+        // Bookmark functions
+        async function addBookmark() {
+            const authToken = localStorage.getItem('authToken');
+            if (!authToken) {
+                alert('Vui lòng đăng nhập để sử dụng tính năng bookmark');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/bookmarks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        book_id: currentBook.id,
+                        chapter_id: currentChapter.id,
+                        position: window.pageYOffset,
+                        note: prompt('Thêm ghi chú (tùy chọn):') || ''
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Đã thêm bookmark thành công!');
+                } else {
+                    alert('Có lỗi xảy ra khi thêm bookmark');
+                }
+            } catch (error) {
+                console.error('Error adding bookmark:', error);
+                alert('Có lỗi xảy ra khi thêm bookmark');
+            }
+        }
+
+        function shareChapter() {
+            if (navigator.share) {
+                navigator.share({
+                    title: `${currentChapter.title} - ${currentBook.title}`,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Đã copy link vào clipboard!');
+                });
+            }
+        }
+
+        // Utility functions
+        function throttle(func, limit) {
+            let inThrottle;
+            return function() {
+                const args = arguments;
+                const context = this;
+                if (!inThrottle) {
+                    func.apply(context, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        goToPrevChapter();
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        goToNextChapter();
+                        break;
+                    case 'b':
+                        e.preventDefault();
+                        addBookmark();
+                        break;
+                    case ',':
+                        e.preventDefault();
+                        toggleSettings();
+                        break;
+                }
+            }
+        });
+
+        // Auto-save on page unload
+        window.addEventListener('beforeunload', () => {
+            saveReadingPosition();
+        });
+
+        // Restore reading position on load
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('reading-position');
+            if (saved) {
+                const position = JSON.parse(saved);
+                if (position.bookSlug === bookSlug && position.chapterIndex === chapterIndex) {
+                    setTimeout(() => {
+                        window.scrollTo(0, position.scrollPosition);
+                    }, 500);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
